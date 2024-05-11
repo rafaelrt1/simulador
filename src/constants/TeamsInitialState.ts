@@ -1,0 +1,48 @@
+const teamsInitialState = [
+  {
+    id: 1,
+    name: "The Stronghest",
+    points: 0,
+    playedMatches: 0,
+    victories: 0,
+    defeats: 0,
+    draws: 0,
+    goalsScored: 0,
+    goalsConceded: 0,
+  },
+  {
+    id: 2,
+    name: "Grêmio",
+    points: 0,
+    playedMatches: 0,
+    victories: 0,
+    defeats: 0,
+    draws: 0,
+    goalsScored: 0,
+    goalsConceded: 0,
+  },
+  {
+    id: 3,
+    name: "Huachipato",
+    points: 0,
+    playedMatches: 0,
+    victories: 0,
+    defeats: 0,
+    draws: 0,
+    goalsScored: 0,
+    goalsConceded: 0,
+  },
+  {
+    id: 4,
+    name: "Estudiantes",
+    points: 0,
+    playedMatches: 0,
+    victories: 0,
+    defeats: 0,
+    draws: 0,
+    goalsScored: 0,
+    goalsConceded: 0,
+  },
+];
+
+export { teamsInitialState };
