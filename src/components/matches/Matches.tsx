@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { DivMatch, Input, TeamName, Text } from "./MatchesCSS";
 import {
   IRound,
@@ -9,10 +9,10 @@ import {
 import { allRounds } from "../../constants/Rounds";
 
 const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
-  const [rounds, setRounds] = useState<IRound[]>(allRounds);
+  const rounds:IRound[] =  allRounds;
 
   const sortTeams = (cpTeams: ITeam[]): ITeam[] => {
-    let sortedTeams: ITeam[] = cpTeams.sort((a, b) => {
+    const sortedTeams: ITeam[] = cpTeams.sort((a, b) => {
       const points = a.points === b.points ? 0 : a.points > b.points ? -1 : 1;
       const goalsDifference =
         a.goalsScored - a.goalsConceded === b.goalsScored - b.goalsConceded
@@ -32,27 +32,22 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
     return sortedTeams;
   };
 
-  const handleChangeScore = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    match: IRound,
-    team: "home" | "guest"
-  ) => {
-    const changedTeamIsHomeOrGuest = team;
-    const opponentOfChangedTeamIsHomeOrGuest = team === "home" ? "guest" : "home";
+  const modifyClassification = (match: IRound, changedTeamIsHomeOrGuest: "home" | "guest", opponentOfChangedTeamIsHomeOrGuest: "home" | "guest", selectedTeamScore: number, opponentScore: number) => {
+    if ((!isNaN(selectedTeamScore) && !isNaN(opponentScore)) || (isNaN(selectedTeamScore) && isNaN(opponentScore))) {
+      const cpTeams = [...teams];
+      let selectedTeamData: ITeamProps[] = [];
+      let selectedTeamOpponentData: ITeamProps[] = [];
+      let selectedTeamGoalsScored = 0;
+      let selectedTeamGoalsConceded = 0;
+      let selectedTeamVictories = 0;
+      let selectedTeamDefeats = 0;
+      let selectedTeamDraws = 0;
 
-    let cpMatches = [...rounds];
-    let cpMatch = { ...rounds[match.matchId - 1] };
-    cpMatch[changedTeamIsHomeOrGuest].score = parseInt(event.target.value);
-    cpMatches[match.matchId - 1] = cpMatch;
-
-    let selectedTeamScore = Number(cpMatch[changedTeamIsHomeOrGuest].score);
-    let opponentScore = Number(cpMatch[opponentOfChangedTeamIsHomeOrGuest].score);
-
-    if (
-      (!isNaN(selectedTeamScore) && !isNaN(opponentScore)) ||
-      (isNaN(selectedTeamScore) && isNaN(opponentScore))
-    ) {
-      let cpTeams = [...teams];
+      let selectedTeamOpponentGoalsScored = 0;
+      let selectedTeamOpponentGoalsConceded = 0;
+      let selectedTeamOpponentVictories = 0;
+      let selectedTeamOpponentDefeats = 0;
+      let selectedTeamOpponentDraws = 0;
 
       const allChangedTeamMatches = rounds.filter((m) => {
         return (
@@ -80,9 +75,6 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           return m.home.score !== undefined;
         }
       );
-
-      let selectedTeamData: ITeamProps[] = [];
-      let selectedTeamOpponentData: ITeamProps[] = [];
 
       allChangedTeamPlayedMatches.forEach((playedMatch) => {
         if (match[changedTeamIsHomeOrGuest].id === playedMatch.home.id) {
@@ -136,11 +128,6 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
         }
       });
 
-      let selectedTeamGoalsScored = 0;
-      let selectedTeamGoalsConceded = 0;
-      let selectedTeamVictories = 0;
-      let selectedTeamDefeats = 0;
-      let selectedTeamDraws = 0;
       selectedTeamData.forEach((team) => {
         selectedTeamGoalsScored += team.goalsScored;
         selectedTeamGoalsConceded += team.goalsConceded;
@@ -152,11 +139,6 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
       });
       const selectedTeamPoints = selectedTeamVictories * 3 + selectedTeamDraws;
 
-      let selectedTeamOpponentGoalsScored = 0;
-      let selectedTeamOpponentGoalsConceded = 0;
-      let selectedTeamOpponentVictories = 0;
-      let selectedTeamOpponentDefeats = 0;
-      let selectedTeamOpponentDraws = 0;
       selectedTeamOpponentData.forEach((team) => {
         selectedTeamOpponentGoalsScored += team.goalsScored;
         selectedTeamOpponentGoalsConceded += team.goalsConceded;
@@ -176,7 +158,7 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
         );
       });
 
-      let teamsListAddingChangedTeams = teamsListWithoutChangedTeams;
+      const teamsListAddingChangedTeams = teamsListWithoutChangedTeams;
 
       teamsListAddingChangedTeams.push(
         {
@@ -203,9 +185,18 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
         }
       );
       const sortedTeams = sortTeams(teamsListAddingChangedTeams);
-      setRounds(cpMatches);
       setTeams(sortedTeams);
     }
+  };
+
+  const handleChangeScore = (event: React.ChangeEvent<HTMLInputElement>, match: IRound, homeOrGuest: "home" | "guest") => {
+    const changedTeamIsHomeOrGuest = homeOrGuest;
+    const opponentOfChangedTeamIsHomeOrGuest = homeOrGuest === "home" ? "guest" : "home";
+    let cpMatch = { ...rounds[match.matchId - 1] };
+    cpMatch[changedTeamIsHomeOrGuest].score = parseInt(event.target.value);
+    const selectedTeamScore = Number(cpMatch[changedTeamIsHomeOrGuest].score);
+    const opponentScore = Number(cpMatch[opponentOfChangedTeamIsHomeOrGuest].score);
+    modifyClassification(match, changedTeamIsHomeOrGuest, opponentOfChangedTeamIsHomeOrGuest, selectedTeamScore, opponentScore);
   };
 
   return (
