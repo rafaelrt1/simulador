@@ -9,7 +9,7 @@ import {
 import { allRounds } from "../../constants/Rounds";
 
 const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
-  const [rounds, setMatches] = useState<IRound[]>(allRounds);
+  const [rounds, setRounds] = useState<IRound[]>(allRounds);
 
   const sortTeams = (cpTeams: ITeam[]): ITeam[] => {
     let sortedTeams: ITeam[] = cpTeams.sort((a, b) => {
@@ -203,7 +203,7 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
         }
       );
       const sortedTeams = sortTeams(teamsListAddingChangedTeams);
-      setMatches(cpMatches);
+      setRounds(cpMatches);
       setTeams(sortedTeams);
     }
   };
