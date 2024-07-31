@@ -16,6 +16,8 @@ const Table: React.FC<ITeamsList> = ({ teams }) => {
           <TableH>GP</TableH>
           <TableH>GC</TableH>
           <TableH>SG</TableH>
+          <TableH>GV</TableH>
+          <TableH>R</TableH>
         </TableRow>
       </TableHead>
       <tbody>
@@ -31,6 +33,8 @@ const Table: React.FC<ITeamsList> = ({ teams }) => {
               <TableData>{team.goalsScored}</TableData>
               <TableData>{team.goalsConceded}</TableData>
               <TableData>{team.goalsScored - team.goalsConceded}</TableData>
+              <TableData>{team.goalsScoredAsGuest}</TableData>
+              <TableData>{team.conmebolRankingPositioning}</TableData>
             </TableRow>
           );
         })}

@@ -14,12 +14,14 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
   const sortTeams = (cpTeams: ITeam[]): ITeam[] => {
     const sortedTeams: ITeam[] = cpTeams.sort((a, b) => {
       const points = a.points === b.points ? 0 : a.points > b.points ? -1 : 1;
+
       const goalsDifference =
         a.goalsScored - a.goalsConceded === b.goalsScored - b.goalsConceded
           ? 0
           : a.goalsScored - a.goalsConceded > b.goalsScored - b.goalsConceded
           ? -1
           : 1;
+
       const goalsScored =
         a.goalsScored === b.goalsScored
           ? 0
@@ -27,7 +29,21 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           ? -1
           : 1;
 
-      return points || goalsDifference || goalsScored;
+      const goalsScoredAsGuest =
+        a.goalsScoredAsGuest === b.goalsScoredAsGuest
+          ? 0
+          : a.goalsScoredAsGuest > b.goalsScoredAsGuest
+          ? -1
+          : 1;
+
+      const ranking =
+        a.conmebolRankingPositioning === b.conmebolRankingPositioning
+          ? 0
+          : a.conmebolRankingPositioning > b.conmebolRankingPositioning
+          ? 1
+          : -1;
+
+      return points || goalsDifference || goalsScored || goalsScoredAsGuest || ranking;
     });
     return sortedTeams;
   };
@@ -37,17 +53,20 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
       const cpTeams = [...teams];
       let selectedTeamData: ITeamProps[] = [];
       let selectedTeamOpponentData: ITeamProps[] = [];
+
       let selectedTeamGoalsScored = 0;
       let selectedTeamGoalsConceded = 0;
       let selectedTeamVictories = 0;
       let selectedTeamDefeats = 0;
       let selectedTeamDraws = 0;
+      let selectedTeamGoalsScoredAsGuest = 0;
 
       let selectedTeamOpponentGoalsScored = 0;
       let selectedTeamOpponentGoalsConceded = 0;
       let selectedTeamOpponentVictories = 0;
       let selectedTeamOpponentDefeats = 0;
       let selectedTeamOpponentDraws = 0;
+      let selectedTeamOpponentGoalsScoredAsGuest = 0;
 
       const allChangedTeamMatches = rounds.filter((m) => {
         return (
@@ -87,6 +106,7 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           selectedTeamData.push({
             goalsScored: Number(playedMatch.home.score),
             goalsConceded: Number(playedMatch.guest.score),
+            goalsScoredAsGuest: 0
           });
         } else {
           if (
@@ -98,6 +118,7 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           selectedTeamData.push({
             goalsScored: Number(playedMatch.guest.score),
             goalsConceded: Number(playedMatch.home.score),
+            goalsScoredAsGuest: Number(playedMatch.guest.score)
           });
         }
       });
@@ -113,6 +134,7 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           selectedTeamOpponentData.push({
             goalsScored: Number(playedMatch.guest.score),
             goalsConceded: Number(playedMatch.home.score),
+            goalsScoredAsGuest: Number(playedMatch.guest.score)
           });
         } else {
           if (
@@ -124,12 +146,14 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           selectedTeamOpponentData.push({
             goalsScored: Number(playedMatch.home.score),
             goalsConceded: Number(playedMatch.guest.score),
+            goalsScoredAsGuest: 0
           });
         }
       });
 
       selectedTeamData.forEach((team) => {
         selectedTeamGoalsScored += team.goalsScored;
+        selectedTeamGoalsScoredAsGuest += team.goalsScoredAsGuest;
         selectedTeamGoalsConceded += team.goalsConceded;
         team.goalsScored > team.goalsConceded
           ? (selectedTeamVictories += 1)
@@ -141,6 +165,7 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
 
       selectedTeamOpponentData.forEach((team) => {
         selectedTeamOpponentGoalsScored += team.goalsScored;
+        selectedTeamOpponentGoalsScoredAsGuest += team.goalsScoredAsGuest;
         selectedTeamOpponentGoalsConceded += team.goalsConceded;
         team.goalsScored > team.goalsConceded
           ? (selectedTeamOpponentVictories += 1)
@@ -171,6 +196,8 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           draws: selectedTeamDraws,
           goalsScored: selectedTeamGoalsScored,
           goalsConceded: selectedTeamGoalsConceded,
+          conmebolRankingPositioning: match[changedTeamIsHomeOrGuest].conmebolRankingPositioning,
+          goalsScoredAsGuest: selectedTeamGoalsScoredAsGuest
         },
         {
           id: match[opponentOfChangedTeamIsHomeOrGuest].id,
@@ -182,6 +209,8 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
           draws: selectedTeamOpponentDraws,
           goalsScored: selectedTeamOpponentGoalsScored,
           goalsConceded: selectedTeamOpponentGoalsConceded,
+          conmebolRankingPositioning: match[opponentOfChangedTeamIsHomeOrGuest].conmebolRankingPositioning,
+          goalsScoredAsGuest: selectedTeamOpponentGoalsScoredAsGuest
         }
       );
       const sortedTeams = sortTeams(teamsListAddingChangedTeams);
@@ -200,31 +229,33 @@ const Matches: React.FC<ITeamsList> = ({ teams, setTeams }) => {
   };
 
   return (
-    <div>
-      {rounds.map((match, index) => {
-        return (
-          <DivMatch key={index}>
-            <TeamName>{match.home.name}</TeamName>
-            <Input
-              type="number"
-              defaultValue={match.home?.score}
-              onChange={(e) => {
-                handleChangeScore(e, match, "home");
-              }}
-            ></Input>
-            <Text>x</Text>
-            <Input
-              type="number"
-              defaultValue={match.guest?.score}
-              onChange={(e) => {
-                handleChangeScore(e, match, "guest");
-              }}
-            ></Input>
-            <TeamName> {match.guest.name}</TeamName>
-          </DivMatch>
-        );
-      })}
-    </div>
+      <div>
+        {rounds.map((match, index) => {
+          return (
+            <DivMatch key={index}>
+              <TeamName>{match.home.name}</TeamName>
+              <Input
+                disabled={match.played}
+                type="number"
+                defaultValue={match.home?.score}
+                onChange={(e) => {
+                  handleChangeScore(e, match, "home");
+                }}
+              ></Input>
+              <Text>x</Text>
+              <Input
+                disabled={match.played}
+                type="number"
+                defaultValue={match.guest?.score}
+                onChange={(e) => {
+                  handleChangeScore(e, match, "guest");
+                }}
+              ></Input>
+              <TeamName> {match.guest.name}</TeamName>
+            </DivMatch>
+          );
+        })}
+      </div>
   );
 };
 

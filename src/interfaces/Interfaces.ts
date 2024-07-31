@@ -2,16 +2,19 @@ export interface IHomeTeam {
   id: number;
   name: string;
   score: number | undefined;
+  conmebolRankingPositioning: number;
 }
 
 export interface IGuestTeam {
   id: number;
   name: string;
   score: number | undefined;
+  conmebolRankingPositioning: number;
 }
 
 export interface IRound {
   home: IHomeTeam;
+  played: boolean;
   guest: IGuestTeam;
   matchId: number;
 }
@@ -19,6 +22,7 @@ export interface IRound {
 export interface ITeamProps {
   goalsScored: number;
   goalsConceded: number;
+  goalsScoredAsGuest: number;
 }
 
 export interface ITeam {
@@ -31,6 +35,8 @@ export interface ITeam {
   draws: number;
   goalsScored: number;
   goalsConceded: number;
+  conmebolRankingPositioning: number;
+  goalsScoredAsGuest: number
 }
 
 export interface ITeamsList {
